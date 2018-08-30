@@ -5,6 +5,7 @@ defmodule Tus.OptionsTest do
 
   import Plug.Conn.Status, only: [code: 1]
   import Tus.TestHelpers, only: [test_conn: 2, get_config: 0]
+  alias Tus.Controller
   alias Tus.TestController
 
   setup_all do
@@ -49,7 +50,7 @@ defmodule Tus.OptionsTest do
           {"x-http-method-override", target}
         ]
       }
-      |> TestController.override_method()
+      |> Controller.override_method()
 
     assert conn.method == target
   end
@@ -65,7 +66,7 @@ defmodule Tus.OptionsTest do
           {"x-http-method-override", target}
         ]
       }
-      |> TestController.override_method()
+      |> Controller.override_method()
 
     assert conn.method == original
   end
@@ -81,7 +82,7 @@ defmodule Tus.OptionsTest do
           {"x-http-method-override", target}
         ]
       }
-      |> TestController.override_method()
+      |> Controller.override_method()
 
     assert conn.method == original
   end
