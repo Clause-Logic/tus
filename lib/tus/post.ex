@@ -85,12 +85,12 @@ defmodule Tus.Post do
   end
 
   defp create_file(file, config) do
-    file = Tus.storage_create(file, config)
+    file = Tus.Storage.create(file, config)
     {:ok, file}
   end
 
   defp cache_file(file, config) do
-    Tus.cache_put(file, config)
+    Tus.Cache.put(file, config)
     :ok
   end
 end
