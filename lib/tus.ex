@@ -43,13 +43,13 @@ defmodule Tus do
     use Tus.Controller
 
     # start upload optional callback
-    def on_begin_upload(file) do
+    def on_begin_upload(conn, file, config) do
       ...
       :ok  # or {:error, reason} to reject the uplaod
     end
-    
+
     # Completed upload optional callback
-    def on_complete_upload(file) do
+    def on_complete_upload(conn, file, config) do
       ...
     end
   end
@@ -70,7 +70,7 @@ defmodule Tus do
   **3. Add config for each controller (see next section)**
 
 
-  ## Configuration (the global way) 
+  ## Configuration (the global way)
 
   ```elixir
   # List here all of your upload controllers
@@ -98,7 +98,7 @@ defmodule Tus do
     [`tus_cache_redis`](https://hex.pm/packages/tus_cache_redis) hex package to use a **Redis** based one.
 
   - `max_size`:
-    hard limit on the maximum size an uploaded file can have 
+    hard limit on the maximum size an uploaded file can have
 
   ### Options for `Tus.Storage.Local`
 

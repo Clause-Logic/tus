@@ -21,14 +21,14 @@ defmodule Tus.Controller do
         Tus.Controller.call_method(__MODULE__, conn, config |> Map.put(:uid, uid))
       end
 
-      def on_begin_upload(_file) do
+      def on_begin_upload(_conn, _file, _config) do
         :ok
       end
 
-      def on_complete_upload(_file) do
+      def on_complete_upload(_conn, _file, _config) do
       end
 
-      defoverridable on_begin_upload: 1, on_complete_upload: 1
+      defoverridable on_begin_upload: 3, on_complete_upload: 3
     end
   end
 
@@ -49,8 +49,8 @@ defmodule Tus.Controller do
       |> Enum.into(%{})
       |> Map.put(:cache_name, Module.concat(module, TusCache))
       |> Map.put(:version, get_version(conn))
-      |> Map.put(:on_begin_upload, &module.on_begin_upload/1)
-      |> Map.put(:on_complete_upload, &module.on_complete_upload/1)
+      |> Map.put(:on_begin_upload, &module.on_begin_upload/3)
+      |> Map.put(:on_complete_upload, &module.on_complete_upload/3)
 
     Map.merge(app_env, config)
   end
