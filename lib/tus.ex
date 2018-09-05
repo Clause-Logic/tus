@@ -43,13 +43,13 @@ defmodule Tus do
     use Tus.Controller
 
     # start upload optional callback
-    def on_begin_upload(file) do
+    def on_begin_upload(conn, file, config) do
       ...
       :ok  # or {:error, reason} to reject the uplaod
     end
-    
+
     # Completed upload optional callback
-    def on_complete_upload(file) do
+    def on_complete_upload(conn, file, config) do
       ...
     end
   end
@@ -70,7 +70,7 @@ defmodule Tus do
   **3. Add config for each controller (see next section)**
 
 
-  ## Configuration (the global way) 
+  ## Configuration (the global way)
 
   ```elixir
   # List here all of your upload controllers
@@ -97,8 +97,12 @@ defmodule Tus do
     This library comes with `Tus.Cache.Memory` but you can install the
     [`tus_cache_redis`](https://hex.pm/packages/tus_cache_redis) hex package to use a **Redis** based one.
 
+  - `slice_path`: Enable slice to path.
+    ex: When uid is `631c6ab7-5539-4a43-8553-019e1279ddb9` the file path will be
+    `6/3/1/631c6ab7-5539-4a43-8553-019e1279ddb9`
+
   - `max_size`:
-    hard limit on the maximum size an uploaded file can have 
+    hard limit on the maximum size an uploaded file can have
 
   ### Options for `Tus.Storage.Local`
 
@@ -162,40 +166,5 @@ defmodule Tus do
     conn
     |> put_resp_header("tus-version", str_supported_versions())
     |> resp(:precondition_failed, "API version not supported")
-  end
-
-  @doc false
-  def cache_get(%{cache: cache, cache_name: cache_name, uid: uid}) do
-    cache.get(cache_name, uid)
-  end
-
-  @doc false
-  def cache_put(%Tus.File{uid: uid} = file, %{cache: cache, cache_name: cache_name}) do
-    cache.put(cache_name, uid, file)
-  end
-
-  @doc false
-  def cache_delete(%Tus.File{uid: uid}, %{cache: cache, cache_name: cache_name}) do
-    cache.delete(cache_name, uid)
-  end
-
-  @doc false
-  def storage_create(%Tus.File{} = file, %{storage: storage} = config) do
-    storage.create(file, config)
-  end
-
-  @doc false
-  def storage_append(%Tus.File{} = file, %{storage: storage} = config, data) do
-    storage.append(file, config, data)
-  end
-
-  @doc false
-  def storage_complete_upload(%Tus.File{} = file, %{storage: storage} = config) do
-    storage.complete_upload(file, config)
-  end
-
-  @doc false
-  def storage_delete(%Tus.File{} = file, %{storage: storage} = config) do
-    storage.delete(file, config)
   end
 end

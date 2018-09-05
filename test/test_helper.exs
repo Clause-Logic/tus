@@ -1,13 +1,13 @@
 defmodule Tus.TestController do
   use Tus.Controller
 
-  def on_begin_upload(_file) do
-    send self(), :on_begin_upload_called
+  def on_begin_upload(_conn, _file, _config) do
+    send(self(), :on_begin_upload_called)
     :ok
   end
 
-  def on_complete_upload(_file) do
-    send self(), :on_complete_upload_called
+  def on_complete_upload(_conn, _file, _config) do
+    send(self(), :on_complete_upload_called)
     :ok
   end
 end
@@ -25,7 +25,7 @@ defmodule Tus.TestHelpers do
   def get_config do
     Application.get_env(:tus, Tus.TestController)
     |> Enum.into(%{})
-    |> Map.put(:cache_name,  Module.concat(Tus.TestController, TusCache))
+    |> Map.put(:cache_name, Module.concat(Tus.TestController, TusCache))
   end
 end
 

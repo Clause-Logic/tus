@@ -5,8 +5,8 @@ defmodule Tus.Delete do
 
   def delete(conn, %{version: version} = config) when version == "1.0.0" do
     with {:ok, %Tus.File{} = file} <- get_file(config) do
-      Tus.storage_delete(file, config)
-      Tus.cache_delete(file, config)
+      Tus.Storage.delete(file, config)
+      Tus.Cache.delete(file, config)
 
       conn
       |> put_resp_header("tus-resumable", config.version)
@@ -20,7 +20,7 @@ defmodule Tus.Delete do
   end
 
   defp get_file(config) do
-    case Tus.cache_get(config) do
+    case Tus.Cache.get(config) do
       %Tus.File{} = file -> {:ok, file}
       _ -> :file_not_found
     end
