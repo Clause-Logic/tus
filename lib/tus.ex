@@ -97,6 +97,10 @@ defmodule Tus do
     This library comes with `Tus.Cache.Memory` but you can install the
     [`tus_cache_redis`](https://hex.pm/packages/tus_cache_redis) hex package to use a **Redis** based one.
 
+  - `slice_path`: Enable slice to path.
+    ex: When uid is `631c6ab7-5539-4a43-8553-019e1279ddb9` the file path will be
+    `6/3/1/631c6ab7-5539-4a43-8553-019e1279ddb9`
+
   - `max_size`:
     hard limit on the maximum size an uploaded file can have
 

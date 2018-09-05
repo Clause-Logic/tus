@@ -1,42 +1,64 @@
 defmodule Tus.Storage.Local do
   @default_base_path "priv/static/files/"
 
-  def get_path(uid) do
-    uid
-    |> String.split("")
-    |> Enum.slice(1, 3)
+  def file_path(uid, config) do
+    [base_path(config), slice_path(uid, config)]
     |> Path.join()
   end
 
-  defp base_path(config) do
+  @doc """
+  Get config base_path.
+    Default: #{@default_base_path}
+  """
+  def base_path(config) do
     config
     |> Map.get(:base_path, @default_base_path)
+  end
+
+  defp local_path(path, config) do
+    [destination_dir(config), path]
+    |> Path.join()
+  end
+
+  defp destination_dir(config) do
+    config
+    |> base_path()
     |> Path.expand()
   end
 
-  def make_basepath(path, config) do
-    basepath = Path.join([base_path(config), path])
-    File.mkdir_p!(basepath)
-    basepath
+  @doc false
+  def slice_path(uid, %{slice_path: true} = _config) do
+    uid
+    |> String.split("")
+    |> Enum.slice(1, 3)
+    |> Enum.concat([uid])
+    |> Path.join()
   end
 
-  def create(file, config) do
-    path = get_path(file.uid)
+  def slice_path(uid, _config), do: uid
+
+  def make_basepath(filepath) do
+    filepath
+    |> Path.dirname()
+    |> File.mkdir_p!()
+
+    filepath
+  end
+
+  def create(%{uid: uid} = file, config) do
+    path = file_path(uid, config)
 
     path
-    |> make_basepath(config)
-    |> Path.join(file.uid)
+    |> local_path(config)
+    |> make_basepath()
     |> File.open!([:write])
     |> File.close()
-
-    path = path |> Path.join(file.uid)
 
     %Tus.File{file | path: path}
   end
 
-  def append(file, config, body) do
-    base_path(config)
-    |> Path.join(file.path)
+  def append(%{path: path} = file, config, body) do
+    local_path(path, config)
     |> File.open([:append, :binary, :delayed_write, :raw])
     |> case do
       {:ok, filesto} ->
@@ -53,8 +75,8 @@ defmodule Tus.Storage.Local do
     {:ok, file}
   end
 
-  def delete(file, config) do
-    Path.join([base_path(config), file.path])
+  def delete(%{path: path}, config) do
+    local_path(path, config)
     |> File.rm()
   end
 end
