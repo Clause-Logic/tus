@@ -6,6 +6,12 @@ defmodule Tus.Storage.Local do
     |> Path.join()
   end
 
+  def url(uid, config) do
+    file_path(uid, config)
+    |> local_path(config)
+    |> URI.encode()
+  end
+
   @doc """
   Get config base_path.
     Default: #{@default_base_path}
