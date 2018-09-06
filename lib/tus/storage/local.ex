@@ -2,8 +2,7 @@ defmodule Tus.Storage.Local do
   @default_base_path "priv/static/files/"
 
   def file_path(uid, config) do
-    [base_path(config), slice_path(uid, config)]
-    |> Path.join()
+    slice_path(uid, config)
   end
 
   def url(uid, config) do
@@ -22,13 +21,8 @@ defmodule Tus.Storage.Local do
   end
 
   defp local_path(path, config) do
-    [destination_dir(config), path]
-    |> Path.join()
-  end
-
-  defp destination_dir(config) do
-    config
-    |> base_path()
+    base_path(config)
+    |> Path.join(path)
     |> Path.expand()
   end
 
@@ -64,7 +58,8 @@ defmodule Tus.Storage.Local do
   end
 
   def append(%{path: path} = file, config, body) do
-    local_path(path, config)
+    path
+    |> local_path(config)
     |> File.open([:append, :binary, :delayed_write, :raw])
     |> case do
       {:ok, filesto} ->
@@ -82,7 +77,8 @@ defmodule Tus.Storage.Local do
   end
 
   def delete(%{path: path}, config) do
-    local_path(path, config)
+    path
+    |> local_path(config)
     |> File.rm()
   end
 end
