@@ -9,16 +9,8 @@ defmodule Tus.Patch do
          {:ok, data, conn} <- get_body(conn),
          data_size <- byte_size(data),
          :ok <- valid_size?(file, data_size),
-         {:ok, file, new_offset} <- append_data(file, config, data) do
-      file = %Tus.File{file | offset: new_offset}
-      Tus.Cache.put(file, config)
-
-      if upload_completed?(file) do
-        Tus.Storage.complete_upload(file, config)
-        config.on_complete_upload.(conn, file, config)
-        Tus.Cache.delete(file, config)
-      end
-
+         {:ok, file} <- append_data(file, config, data),
+         {:ok, file} <- maybe_upload_completed(conn, file, config) do
       conn
       |> put_resp_header("tus-resumable", config.version)
       |> put_resp_header("upload-offset", "#{file.offset}")
@@ -41,6 +33,27 @@ defmodule Tus.Patch do
 
       :too_small ->
         conn |> resp(:conflict, "Data is smaller than what the storage backend can handle")
+    end
+  end
+
+  defp maybe_upload_completed(conn, file, config) do
+    Tus.Cache.put(file, config)
+
+    if upload_completed?(file) do
+      Tus.Storage.complete_upload(file, config)
+
+      callback_result =
+        config.on_complete_upload.(conn, file, config)
+        |> case do
+          {:error, _} = res -> res
+          _other -> {:ok, file}
+        end
+
+      Tus.Cache.delete(file, config)
+
+      callback_result
+    else
+      {:ok, file}
     end
   end
 
@@ -84,8 +97,8 @@ defmodule Tus.Patch do
 
   defp append_data(file, config, data) do
     case Tus.Storage.append(file, config, data) do
-      {:ok, file} -> {:ok, file, file.offset + byte_size(data)}
-      {:ok, file, new_offset} -> {:ok, file, new_offset}
+      {:ok, file} -> {:ok, %Tus.File{file | offset: file.offset + byte_size(data)}}
+      {:ok, file, new_offset} -> {:ok, %Tus.File{file | offset: new_offset}}
       {:error, reason} -> {:error, reason}
     end
   end
