@@ -9,8 +9,8 @@ defmodule Tus.Patch do
          {:ok, data, conn} <- get_body(conn),
          data_size <- byte_size(data),
          :ok <- valid_size?(file, data_size),
-         {:ok, file} <- append_data(file, config, data) do
-      file = %Tus.File{file | offset: file.offset + data_size}
+         {:ok, file, new_offset} <- append_data(file, config, data) do
+      file = %Tus.File{file | offset: new_offset}
       Tus.Cache.put(file, config)
 
       if upload_completed?(file) do
@@ -83,7 +83,11 @@ defmodule Tus.Patch do
   end
 
   defp append_data(file, config, data) do
-    Tus.Storage.append(file, config, data)
+    case Tus.Storage.append(file, config, data) do
+      {:ok, file} -> {:ok, file, file.offset + byte_size(data)}
+      {:ok, file, new_offset} -> {:ok, file, new_offset}
+      {:error, reason} -> {:error, reason}
+    end
   end
 
   defp upload_completed?(file) do
