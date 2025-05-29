@@ -28,11 +28,14 @@ defmodule Tus.Patch do
       :too_large ->
         conn |> resp(:request_entity_too_large, "Data is larger than expected")
 
-      {:error, _reason} ->
-        conn |> resp(:bad_request, "Unable to save file")
-
       :too_small ->
         conn |> resp(:conflict, "Data is smaller than what the storage backend can handle")
+
+      {:error, reason} when is_binary(reason) ->
+        conn |> resp(:bad_request, reason)
+
+      {:error, _reason} ->
+        conn |> resp(:bad_request, "Unable to save file")
     end
   end
 
