@@ -5,8 +5,6 @@ defmodule Tus.Application do
 
   use Application
 
-  import Supervisor.Spec, only: [worker: 3]
-
   def start(_type, _args) do
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
@@ -16,17 +14,15 @@ defmodule Tus.Application do
 
   defp get_children do
     Application.get_env(:tus, :controllers, [])
-    |> Enum.map(&get_worker/1)
+    |> Enum.map(&child_spec/1)
   end
 
-  defp get_worker(controller) do
-    # Starts a worker by calling: Tus.Worker.start_link(arg)
-    # {Tus.Worker, arg},
+  defp child_spec(controller) do
     config =
       Application.get_env(:tus, controller)
       |> Enum.into(%{})
       |> Map.put(:cache_name, Module.concat(controller, TusCache))
 
-    worker(config.cache, [config], [])
+    {config.cache, config}
   end
 end
