@@ -11,8 +11,10 @@ defmodule Tus.PostTest do
     %{config: get_config()}
   end
 
-  test "`HTTP 413 Request Entity Too Large` if upload larger than the hard config limit", context do
+  test "`HTTP 413 Request Entity Too Large` if upload larger than the hard config limit",
+       context do
     config = context[:config]
+
     conn =
       test_conn(:post, %Plug.Conn{
         req_headers: [
@@ -43,6 +45,7 @@ defmodule Tus.PostTest do
 
   test "hard config limit override the `Tus-Max-Size` soft limit", context do
     config = context[:config]
+
     conn =
       test_conn(:post, %Plug.Conn{
         req_headers: [
@@ -142,6 +145,7 @@ defmodule Tus.PostTest do
 
   test "on_begin_upload called", context do
     config = context[:config]
+
     TestController.post(
       test_conn(:post, %Plug.Conn{
         req_headers: [

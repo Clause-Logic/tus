@@ -6,12 +6,11 @@ defmodule Tus.Head do
   def head(conn, %{version: version} = config) when version == "1.0.0" do
     response(
       conn
-        |> put_resp_header("tus-resumable", config.version)
-        # The Server MUST prevent the client and/or proxies from caching the response
-        # by adding the Cache-Control: no-store header to the response.
-        |> put_resp_header("cache-control", "no-store"),
-
-        Tus.cache_get(config)
+      |> put_resp_header("tus-resumable", config.version)
+      # The Server MUST prevent the client and/or proxies from caching the response
+      # by adding the Cache-Control: no-store header to the response.
+      |> put_resp_header("cache-control", "no-store"),
+      Tus.cache_get(config)
     )
   end
 
